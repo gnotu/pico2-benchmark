@@ -1,2 +1,95 @@
 # pico2-benchmark
 Experiments exploring neural network performance on the pico2
+
+## Generated Models
+### CNN Generator
+gen_cnn.py is a simple script to generate Conv2D models.  It allows exploration of the performance of a compute bound workload on Pico2.  The script accepts a single parameter which is the number of layers.  In this way performance of the defined network can be scaled up linearly.  Performance of a single layer is controlled by varying the input tensor shape and convolution parameters.  Padding is required since the output tensor and input and output tensor shapes must be the same so the layers will stack properly.  The number of multiply-accumulate operations in the model is embedded in the output model file name.
+
+### FC Generator
+gen_fc.py is a simple script to generate FullyConnected models.  It allows exploration of the performance of a memory bandwidth bound workload on Pico2.  The script accepts two parameters:  the number of layers and the width.  In this way performance of the defined network can be scaled up linearly.  FullyConnected layers are inserted in pairs (P&rarr;Q, Q&rarr;P) where P is the number of inputs and Q is the width.  This allows finer grained control of compute and memory.  The number of multiply-accumulate operations in the model is embedded in the output model file name.
+
+### Converter
+convert_model.py is a simple script to convert the ONNX models created by the model generators into C++ code that can be included in the profiling application (main_function.cpp).  This script depends on [onnx2tf](https://github.com/PINTO0309/onnx2tf) which has not been updated in a while (and requires an older version Tensorflow).  It is recommended to create a Python virtual environment for onnx2tf and use that when running convert_model.py.  The conversion process leaves behind TFlite models which can be inspected to see which TFLM operations are being used (e.g., using Netron).
+
+### Profiling Application
+main_function.cpp is simply a hacked version of the [pico-tflmicro](https://github.com/raspberrypi/pico-tflmicro)] Hello World [example](https://github.com/raspberrypi/pico-tflmicro/tree/main/examples/hello_world). In addition to pico-tflmicro, it also depends on the [pico-sdk](https://github.com/raspberrypi/pico-sdk) and the [pico-sdk-tools](https://github.com/raspberrypi/pico-sdk-tools).
+
+Follow the respective instructions to download and build these projects first. Then just replace the code in pico-tflmicro/examples/hello_world with this code and rebuild.
+
+Some defines in main_functions.cpp are relevant:
+* PROFILE_MODEL - turns on profiling (assumes profiling has been enabled when building the TFLM SDK)
+* PROFILE_COUNT - how often to profile (profiling too often overwhelms the serial console)
+* INT8_MODEL - uses the int8 neural network instead of the float32 one
+* ARENA_SIZE - this is a complete swag at the runtime memory required for the model (thanks a lot, ARM)
+
+The application repeatedly calls invokes the neural network, printing the performance to the serial console.  Inference takes place as fast as the RP2350 can compute it so results are printed every PROFILE_COUNT inferences.  The green LED on the RP2350 is toggled each time a result is printed to the serial console.
+
+## TinyML
+
+The TinyML benchmark provides a very informative way to compare performance across platforms and runtimes.
+
+## Appendix:  Python 3.8.20 Environment
+This is the list of packages and their versions used in these experiments.
+
+```
+Package                      Version
+---------------------------- --------
+absl-py                      2.3.1
+astunparse                   1.6.3
+cachetools                   5.5.2
+certifi                      2025.8.3
+charset-normalizer           3.4.3
+coloredlogs                  15.0.1
+flatbuffers                  25.9.23
+gast                         0.4.0
+google-auth                  2.41.0
+google-auth-oauthlib         1.0.0
+google-pasta                 0.2.0
+grpcio                       1.70.0
+h5py                         3.11.0
+humanfriendly                10.0
+idna                         3.10
+importlib_metadata           8.5.0
+keras                        2.13.1
+libclang                     18.1.1
+Markdown                     3.7
+markdown-it-py               3.0.0
+MarkupSafe                   2.1.5
+mdurl                        0.1.2
+mpmath                       1.3.0
+numpy                        1.24.3
+oauthlib                     3.3.1
+onnx                         1.17.0
+onnx_graphsurgeon            0.5.8
+onnx2tf                      1.20.0
+onnxruntime                  1.19.2
+onnxsim                      0.4.36
+opt_einsum                   3.4.0
+packaging                    25.0
+pip                          25.0.1
+protobuf                     4.25.8
+psutil                       7.1.0
+pyasn1                       0.6.1
+pyasn1_modules               0.4.2
+Pygments                     2.19.2
+requests                     2.32.4
+requests-oauthlib            2.0.0
+rich                         14.2.0
+rsa                          4.9.1
+setuptools                   56.0.0
+six                          1.17.0
+sng4onnx                     1.0.4
+sympy                        1.13.3
+tensorboard                  2.13.0
+tensorboard-data-server      0.7.2
+tensorflow                   2.13.1
+tensorflow-estimator         2.13.0
+tensorflow-io-gcs-filesystem 0.34.0
+termcolor                    2.4.0
+typing_extensions            4.5.0
+urllib3                      2.2.3
+Werkzeug                     3.0.6
+wheel                        0.45.1
+wrapt                        1.17.3
+zipp                         3.20.2
+```

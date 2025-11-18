@@ -51,7 +51,7 @@ if __name__ == "__main__":
     model.eval()
 
     # Input to the model
-    x = torch.randn(n_inputs, requires_grad=True)
+    x = torch.randn((1,n_inputs), requires_grad=True)
     torch_out = model(x)
 
     # Export the model

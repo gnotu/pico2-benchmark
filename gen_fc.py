@@ -17,12 +17,14 @@ class MyNet(nn.Module):
         self.num_layers = num_layers
         self.layers = nn.ModuleList([
             nn.Linear(n_inputs, num_width),
+            nn.ReLU(inplace=inplace),
             nn.Linear(num_width, n_outputs),
             nn.ReLU(inplace=inplace)
             ])
         if num_layers > 1:
             for i in range(num_layers-1):
                 self.layers.append(nn.Linear(n_inputs, num_width))
+                self.layers.append(nn.ReLU(inplace=inplace))
                 self.layers.append(nn.Linear(num_width, n_outputs))
                 self.layers.append(nn.ReLU(inplace=inplace))
 

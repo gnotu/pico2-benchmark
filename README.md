@@ -36,6 +36,25 @@ The [TinyML benchmark](https://github.com/mlcommons/tiny/tree/master/benchmark) 
 ### Profiling Application
 For TinyML, one version of ```main_function.cpp``` is provided per model.  As before, it is a hacked version of the pico-tflmicro Hello World example.  The same description and instructions as above apply to each one.  Each of the provided ```main_function_*.cpp``` files will need to be renamed to ```main_function.cpp``` before compiling the application.
 
+### Measured Results on Waveshare RP2350-Plus-16MB
+The above model conversion and deployment procedure was carried out using the Waveshare RP2350-Plus-16MB device.  In the table below, the inference time is compared to the reported inference time on a comparable platform, the Nucleo NUCLEO-U575ZI-Q (as reported in the [MLPerf v1.3 results](https://mlcommons.org/benchmarks/inference-tiny/).
+
+|Platform|Clock|Model|Time(msec)|Speedup|
+|---|---|---|---|---|
+|Waveshare|150MHz|Anomaly Detection|58.95|1.00|
+|Nucleo|160MHz|Anomaly Detection|3.21|18.37|
+|Waveshare|150MHz|Image Classification| 1709.93|1.00|
+|Nucleo|160MHz|Image Classification|109.49|15.62|
+|Waveshare|150MHz|Keyword Spotting| 60.40|1.00|
+|Nucleo|160MHz|Keyword Spotting|28.99|2.08|
+|Waveshare|150MHz|Streaming Wakeword| 192.41|1.00|
+|Nucleo|160MHz|Streaming Wakeword|11.66|16.51|
+|Waveshare|150MHz|Visual Wakeword|1375.02|1.00|
+|Nucleo|160MHz|Visual Wakeword|59.27|23.20|
+
+The difference in performance between the two platforms is quite significant, with the reported Nucleo performance being up to 23x faster than that of Waveshare.  But it should be pointed out that the neural network deployment toolchains are different in the two cases.  As described above, the open source pico-tflmicro package was used to prepare the models for the Waveshare device.  The toolchain reportedly used for the Nucleo device is X-CUBE-AI v10.2 from STMicroelectronics.  This could certainly account for the difference in efficiency, although the contribution of hardware configuration and toolchain is not yet clear.
+
+
 ## Appendix:  Python 3.8.20 Environment
 This is the list of packages and their versions used in these experiments.
 

@@ -6,13 +6,13 @@ Experiments exploring neural network performance on the pico2
 ```gen_cnn.py``` is a simple script to generate Conv2D models.  It allows exploration of the performance of a compute bound workload on Pico2.  The script accepts a single parameter which is the number of layers.  In this way performance of the defined network can be scaled up linearly.  Performance of a single layer is controlled by varying the input tensor shape and convolution parameters.  Padding is required since the output tensor and input and output tensor shapes must be the same so the layers will stack properly.  The number of multiply-accumulate operations in the model is embedded in the output model file name.
 
 ### FC Generator
-```gen_fc.py``` is a simple script to generate FullyConnected models.  It allows exploration of the performance of a memory bandwidth bound workload on Pico2.  The script accepts two parameters:  the number of layers and the width.  In this way performance of the defined network can be scaled up linearly.  FullyConnected layers are inserted in pairs (P&rarr;Q, Q&rarr;P) where P is the number of inputs and Q is the width.  This allows finer grained control of compute and memory.  The number of multiply-accumulate operations in the model is embedded in the output model file name.
+```gen_fc.py``` is a simple script to generate FullyConnected models.  It allows exploration of the performance of a memory bandwidth bound workload on Pico2.  The script accepts two parameters:  the number of layers and the width.  In this way required computation and memory bandwidth of the defined network can be scaled up linearly.  FullyConnected layers are inserted in pairs (P&rarr;Q, Q&rarr;P) where P is the number of inputs and Q is the width.  This allows finer grained control of compute and memory.  The number of multiply-accumulate operations in the model is embedded in the output model file name.
 
 ### Converter
 ```convert_model.py``` is a simple script to convert the ONNX models created by the model generators into C++ code that can be included in the profiling application (main_function.cpp).  This script depends on [onnx2tf](https://github.com/PINTO0309/onnx2tf) which has not been updated in a while (and requires an older version Tensorflow).  It is recommended to create a Python virtual environment for onnx2tf and use that when running convert_model.py.  The conversion process leaves behind TFlite models which can be inspected to see which TFLM operations are being used (e.g., using Netron).
 
 ### Profiling Application
-```main_function.cpp``` is simply a hacked version of the [pico-tflmicro](https://github.com/raspberrypi/pico-tflmicro)] Hello World [example](https://github.com/raspberrypi/pico-tflmicro/tree/main/examples/hello_world). In addition to pico-tflmicro, it also depends on the [pico-sdk](https://github.com/raspberrypi/pico-sdk) and the [pico-sdk-tools](https://github.com/raspberrypi/pico-sdk-tools).
+```main_function.cpp``` is simply a hacked version of the [pico-tflmicro](https://github.com/raspberrypi/pico-tflmicro) Hello World [example](https://github.com/raspberrypi/pico-tflmicro/tree/main/examples/hello_world). In addition to pico-tflmicro, it also depends on the [pico-sdk](https://github.com/raspberrypi/pico-sdk) and the [pico-sdk-tools](https://github.com/raspberrypi/pico-sdk-tools).
 
 Follow the respective instructions to download and build these projects first. Then just replace the code in pico-tflmicro/examples/hello_world with this code and rebuild.
 
@@ -24,7 +24,7 @@ Some defines in main_functions.cpp are relevant:
 * INT8_MODEL - uses the int8 neural network instead of the float32 one
 * ARENA_SIZE - this is a complete swag at the runtime memory required for the model (thanks a lot, ARM)
 
-The application repeatedly calls invokes the neural network, printing the performance to the serial console.  Inference takes place as fast as the RP2350 can compute it so results are printed every PROFILE_COUNT inferences.  The green LED on the RP2350 is toggled each time a result is printed to the serial console.
+The application repeatedly invokes the neural network, printing the performance to the serial console.  Inference takes place as fast as the RP2350 can compute it so results are printed every PROFILE_COUNT inferences.  The green LED on the RP2350 is toggled each time a result is printed to the serial console.
 
 ## TinyML
 
@@ -52,7 +52,7 @@ The above model conversion and deployment procedure was carried out using the Wa
 |Waveshare|150MHz|Visual Wakeword|1375.02|1.00|
 |Nucleo|160MHz|Visual Wakeword|59.27|23.20|
 
-The difference in performance between the two platforms is quite significant, with the reported Nucleo performance being up to 23x faster than that of Waveshare.  But it should be pointed out that the neural network deployment toolchains are different in the two cases.  As described above, the open source pico-tflmicro package was used to prepare the models for the Waveshare device.  The toolchain reportedly used for the Nucleo device is X-CUBE-AI v10.2 from STMicroelectronics.  This could certainly account for the difference in efficiency, although the contribution of hardware configuration and toolchain is not yet clear.
+The difference in performance between the two platforms is quite significant, with the reported Nucleo performance being up to 23x faster than that of Waveshare.  But it should be pointed out that the neural network deployment toolchains are different in the two cases.  As described above, the open source pico-tflmicro package was used to prepare the models for the Waveshare device.  The toolchain reportedly used for the Nucleo device is X-CUBE-AI v10.2 from STMicroelectronics.  This could certainly account for the difference in efficiency, although the contributions of hardware configuration and toolchain are not yet clear.
 
 
 ## Appendix:  Python 3.8.20 Environment

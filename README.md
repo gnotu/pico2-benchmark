@@ -52,8 +52,25 @@ The above model conversion and deployment procedure was carried out using the Wa
 |Waveshare|150MHz|Visual Wakeword|1375.02|1.00|
 |Nucleo|160MHz|Visual Wakeword|59.27|23.20|
 
-The difference in performance between the two platforms is quite significant, with the reported Nucleo performance being up to 23x faster than that of Waveshare.  But it should be pointed out that the neural network deployment toolchains are different in the two cases.  As described above, the open source pico-tflmicro package was used to prepare the models for the Waveshare device.  The toolchain reportedly used for the Nucleo device is X-CUBE-AI v10.2 from STMicroelectronics.  This could certainly account for the difference in efficiency, although the contributions of hardware configuration and toolchain are not yet clear.
+The difference in performance between the two platforms is quite significant, with the reported Nucleo performance being up to 23x faster than that of Waveshare.  But it should be pointed out that the neural network deployment toolchains are different in the two cases.  As described above, the open source pico-tflmicro package was used to prepare the models for the Waveshare device.  The toolchain reportedly used for the Nucleo device is X-CUBE-AI v10.2 from STMicroelectronics.
 
+After acquiring a NUCLEO-U575ZI-Q board, installing STM32Cube AI Studio, and investigating, an explanation for the performance gap emerged.  First, it turns out that the pico-tflmicro example code stores the neural network in flash. Moving the MLPerf TinyML models entirely to SRAM is not possible in all cases since some of the models are too big.  The streaming wake word model, along with a tiny proprietary model with FC, Tanh, ReLU, and Minimum layers were measured.  The results are shown below.
+
+|Platform|Clock|Model|Time(msec)|Speedup|
+|---|---|---|---|---|
+|Waveshare|150MHz|Proprietary FP32|0.252|1.00|
+|Nucleo|160MHz|Proprietary FP32|0.240|1.05|
+|Waveshare|150MHz|Proprietary INT8|0.416|1.00|
+|Nucleo|160MHz|Proprietary INT8|0.089|4.67|
+|Waveshare|150MHz|Streaming Wakeword FP32| 51.542|1.00|
+|Nucleo|160MHz|Streaming Wakeword FP32|47.80|1.08|
+
+Taking the CPU clock difference into account, the FP32 performance is the same on the Waveshare and NUCLEO boards.  The difference in INT8 performance is still quite large.  Detailed profiling showed that the INT8 Tanh operator too 217 usec on average on the RP2350 while the FP32 took only 36 usec.  On the NUCLEO-U575ZI-Q board, the INT8 Tanh operator took 4.6 usec while the FP32 one took 61 usec.  Comparing the largest FC operator, the RP2350 performance was 93 usec (INT8) / 139 usec (FP32) while the NUCLEO-U575ZI-Q performance was 51 usec (INT8) / 141 usec (FP32).
+
+The advantages of the STMicro NUCLEO-U575ZI-Q appear to be:
+* Larger SRAM allows larger models to run more efficiently.
+* Slightly (7%) higher clock speed.
+* Better INT8 optimization of CMSIS-NN compared to generic ARM CMSIS-NN library.
 
 ## Appendix:  Python 3.8.20 Environment
 This is the list of packages and their versions used in these experiments.

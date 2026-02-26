@@ -65,7 +65,7 @@ After acquiring a NUCLEO-U575ZI-Q board, installing STM32Cube AI Studio, and inv
 |Waveshare|150MHz|Streaming Wakeword FP32| 51.542|1.00|
 |Nucleo|160MHz|Streaming Wakeword FP32|47.80|1.08|
 
-Taking the CPU clock difference into account, the FP32 performance is the same on the Waveshare and NUCLEO boards.  The difference in INT8 performance is still quite large.  Detailed profiling showed that the INT8 Tanh operator too 217 usec on average on the RP2350 while the FP32 took only 36 usec.  On the NUCLEO-U575ZI-Q board, the INT8 Tanh operator took 4.6 usec while the FP32 one took 61 usec.  Comparing the largest FC operator, the RP2350 performance was 93 usec (INT8) / 139 usec (FP32) while the NUCLEO-U575ZI-Q performance was 51 usec (INT8) / 141 usec (FP32).
+Taking the CPU clock difference into account, the FP32 performance is the same on the Waveshare and NUCLEO boards.  The difference in INT8 performance is still quite large.  Detailed profiling showed that the INT8 Tanh operator took 217 usec on average on the RP2350 while the FP32 took only 36 usec.  On the NUCLEO-U575ZI-Q board, the INT8 Tanh operator took 4.6 usec while the FP32 one took 61 usec.  Comparing the largest FC operator, the RP2350 performance was 93 usec (INT8) / 139 usec (FP32) while the NUCLEO-U575ZI-Q performance was 51 usec (INT8) / 141 usec (FP32).
 
 The advantages of the STMicro NUCLEO-U575ZI-Q appear to be:
 * Larger SRAM allows larger models to run more efficiently.
